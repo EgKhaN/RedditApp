@@ -9,6 +9,7 @@ import com.egkhan.redditapp.Model.Feed;
 import com.egkhan.redditapp.Model.entry.Entry;
 import com.egkhan.redditapp.Utils.ExtractXML;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -46,25 +47,37 @@ public class MainActivity extends AppCompatActivity {
 //                Log.d(TAG, "onResponse: updated"+entries.get(0).getUpdated());
 //                Log.d(TAG, "onResponse: title"+entries.get(0).getTitle());
 
-
+                ArrayList<Post> posts = new ArrayList<Post>();
                 for (int i = 0; i < entries.size(); i++) {
-                    ExtractXML extractXML1 = new ExtractXML(entries.get(0).getContent(), "<a href=");
+                    ExtractXML extractXML1 = new ExtractXML(entries.get(i).getContent(), "<a href=");
                     List<String> postContent = extractXML1.start();
 
-                    ExtractXML extractXML2 = new ExtractXML(entries.get(0).getContent(), "<img src=");
+                    ExtractXML extractXML2 = new ExtractXML(entries.get(i).getContent(), "<img src=");
                     try {
                         postContent.add(extractXML2.start().get(0));
                     } catch (NullPointerException e) {
                         postContent.add(null);
-                        Log.e(TAG, "onResponse: NullPointerException(thumbnail)"+e.getMessage());
-                    }catch (IndexOutOfBoundsException e) {
+                        Log.e(TAG, "onResponse: NullPointerException(thumbnail)" + e.getMessage());
+                    } catch (IndexOutOfBoundsException e) {
                         postContent.add(null);
-                        Log.e(TAG, "onResponse: IndexOutOfBoundsException(thumbnail)"+e.getMessage());
+                        Log.e(TAG, "onResponse: IndexOutOfBoundsException(thumbnail)" + e.getMessage());
                     }
-
-
+                    int lastPosition = postContent.size() - 1;
+                    posts.add(new Post(
+                            entries.get(i).getTitle(),
+                            entries.get(i).getAuthor().getName(),
+                            entries.get(i).getUpdated(),
+                            postContent.get(0),
+                            postContent.get(lastPosition)
+                    ));
                 }
-
+                for (int i = 0; i < posts.size(); i++) {
+                    Log.d(TAG, "onResponse: \n" + "PostUrl :" + posts.get(i).getPostUrl() + "\n "
+                            + "ThumbnailUrl :" + posts.get(i).getThumbnailUrl() + "\n "
+                            + "Title :" + posts.get(i).getTitle() + "\n "
+                            + "Author :" + posts.get(i).getAuthor() + "\n "
+                            + "Updated :" + posts.get(i).getDate_updated() + "\n ");
+                }
             }
 
             @Override
