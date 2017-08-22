@@ -6,6 +6,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.egkhan.redditapp.Model.Feed;
+import com.egkhan.redditapp.Model.entry.Entry;
+import com.egkhan.redditapp.Utils.ExtractXML;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -15,7 +19,7 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    public static final String  BASE_URL="https://www.reddit.com/r/";
+    public static final String BASE_URL = "https://www.reddit.com/r/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,14 +37,40 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<Feed>() {
             @Override
             public void onResponse(Call<Feed> call, Response<Feed> response) {
-                Log.d(TAG, "onResponse: feed: "+ response.body().toString());
-                Log.d(TAG, "onResponse: Server Response: "+ response);
+                //Log.d(TAG, "onResponse: feed: "+ response.body().toString());
+                Log.d(TAG, "onResponse: Server Response: " + response);
+
+                List<Entry> entries = response.body().getEntryList();
+                Log.d(TAG, "onResponse: enries: " + entries);
+//                Log.d(TAG, "onResponse: author"+entries.get(0).getAuthor().getName());
+//                Log.d(TAG, "onResponse: updated"+entries.get(0).getUpdated());
+//                Log.d(TAG, "onResponse: title"+entries.get(0).getTitle());
+
+
+                for (int i = 0; i < entries.size(); i++) {
+                    ExtractXML extractXML1 = new ExtractXML(entries.get(0).getContent(), "<a href=");
+                    List<String> postContent = extractXML1.start();
+
+                    ExtractXML extractXML2 = new ExtractXML(entries.get(0).getContent(), "<img src=");
+                    try {
+                        postContent.add(extractXML2.start().get(0));
+                    } catch (NullPointerException e) {
+                        postContent.add(null);
+                        Log.e(TAG, "onResponse: NullPointerException(thumbnail)"+e.getMessage());
+                    }catch (IndexOutOfBoundsException e) {
+                        postContent.add(null);
+                        Log.e(TAG, "onResponse: IndexOutOfBoundsException(thumbnail)"+e.getMessage());
+                    }
+
+
+                }
+
             }
 
             @Override
             public void onFailure(Call<Feed> call, Throwable t) {
-                Log.e(TAG, "onFailure: unable to retrieve RSS: "+t.getMessage() );
-                Toast.makeText(MainActivity.this, "An Error Occured: "+t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onFailure: unable to retrieve RSS: " + t.getMessage());
+                Toast.makeText(MainActivity.this, "An Error Occured: " + t.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
         });
