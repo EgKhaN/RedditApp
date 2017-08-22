@@ -3,6 +3,9 @@ package com.egkhan.redditapp;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -23,19 +26,46 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final String BASE_URL = "https://www.reddit.com/r/";
 
+    Button refreshBtn;
+    EditText feedNameEt;
+
+    String currentFeed;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(TAG, "onCreate: starting");
+        refreshBtn = (Button) findViewById(R.id.refreshFeedBtn);
+        feedNameEt = (EditText) findViewById(R.id.feedNameEt);
 
+        refreshBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String feedName = feedNameEt.getText().toString();
+                if(!feedName.equals("")){
+                    currentFeed = feedName;
+                    initRetrofit();
+                }
+                else{
+                    initRetrofit();
+                }
+            }
+        });
+
+
+        initRetrofit();
+
+    }
+
+    private void initRetrofit() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .build();
-
         FeedAPI feedAPI = retrofit.create(FeedAPI.class);
 
-        Call<Feed> call = feedAPI.getFeed();
+        Call<Feed> call = feedAPI.getFeed(currentFeed);
         call.enqueue(new Callback<Feed>() {
             @Override
             public void onResponse(Call<Feed> call, Response<Feed> response) {
@@ -64,13 +94,25 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, "onResponse: IndexOutOfBoundsException(thumbnail)" + e.getMessage());
                     }
                     int lastPosition = postContent.size() - 1;
-                    posts.add(new Post(
-                            entries.get(i).getTitle(),
-                            entries.get(i).getAuthor().getName(),
-                            entries.get(i).getUpdated(),
-                            postContent.get(0),
-                            postContent.get(lastPosition)
-                    ));
+                    try {
+                        posts.add(new Post(
+                                entries.get(i).getTitle(),
+                                entries.get(i).getAuthor().getName(),
+                                entries.get(i).getUpdated(),
+                                postContent.get(0),
+                                postContent.get(lastPosition)
+                        ));
+                    } catch (NullPointerException e) {
+                        posts.add(new Post(
+                                entries.get(i).getTitle(),
+                                null,
+                                entries.get(i).getUpdated(),
+                                postContent.get(0),
+                                postContent.get(lastPosition)
+                        ));
+                        Log.e(TAG, "onResponse: NullPointerException(thumbnail)" + e.getMessage());
+                    }
+
                 }
 //                for (int i = 0; i < posts.size(); i++) {
 //                    Log.d(TAG, "onResponse: \n" + "PostUrl :" + posts.get(i).getPostUrl() + "\n "
