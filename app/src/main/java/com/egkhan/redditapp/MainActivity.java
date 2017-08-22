@@ -3,6 +3,7 @@ package com.egkhan.redditapp;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.egkhan.redditapp.Model.Feed;
@@ -71,13 +72,16 @@ public class MainActivity extends AppCompatActivity {
                             postContent.get(lastPosition)
                     ));
                 }
-                for (int i = 0; i < posts.size(); i++) {
-                    Log.d(TAG, "onResponse: \n" + "PostUrl :" + posts.get(i).getPostUrl() + "\n "
-                            + "ThumbnailUrl :" + posts.get(i).getThumbnailUrl() + "\n "
-                            + "Title :" + posts.get(i).getTitle() + "\n "
-                            + "Author :" + posts.get(i).getAuthor() + "\n "
-                            + "Updated :" + posts.get(i).getDate_updated() + "\n ");
-                }
+//                for (int i = 0; i < posts.size(); i++) {
+//                    Log.d(TAG, "onResponse: \n" + "PostUrl :" + posts.get(i).getPostUrl() + "\n "
+//                            + "ThumbnailUrl :" + posts.get(i).getThumbnailUrl() + "\n "
+//                            + "Title :" + posts.get(i).getTitle() + "\n "
+//                            + "Author :" + posts.get(i).getAuthor() + "\n "
+//                            + "Updated :" + posts.get(i).getDate_updated() + "\n ");
+//                }
+                ListView listView = (ListView)findViewById(R.id.listView);
+                CustomListAdapter customListAdapter = new CustomListAdapter(MainActivity.this,R.layout.card_layout_main,posts);
+                listView.setAdapter(customListAdapter);
             }
 
             @Override
