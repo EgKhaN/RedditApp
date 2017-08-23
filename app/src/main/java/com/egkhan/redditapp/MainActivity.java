@@ -3,7 +3,10 @@ package com.egkhan.redditapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -11,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.egkhan.redditapp.Account.LoginActivity;
 import com.egkhan.redditapp.Comments.CommentActivity;
 import com.egkhan.redditapp.Model.Feed;
 import com.egkhan.redditapp.Model.entry.Entry;
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         refreshBtn = (Button) findViewById(R.id.refreshFeedBtn);
         feedNameEt = (EditText) findViewById(R.id.feedNameEt);
 
+        setupToolbar();
         refreshBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,6 +60,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+
+    private void setupToolbar()
+    {
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_main);
+        setSupportActionBar(toolbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Log.d(TAG, "onMenuItemClick: clicked menu item: "+ item);
+
+                switch (item.getItemId())
+                {
+                    case R.id.navLogin:
+                        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                        startActivity(intent);
+                }
+
+                return false;
+            }
+        });
     }
 
     private void initRetrofit() {
@@ -146,5 +173,11 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.navigation_menu,menu);
+        return true;
     }
 }

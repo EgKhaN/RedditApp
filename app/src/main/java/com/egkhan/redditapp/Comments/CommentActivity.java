@@ -1,12 +1,17 @@
 package com.egkhan.redditapp.Comments;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -14,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.egkhan.redditapp.Account.LoginActivity;
 import com.egkhan.redditapp.FeedAPI;
 import com.egkhan.redditapp.Model.Feed;
 import com.egkhan.redditapp.Model.entry.Entry;
@@ -68,10 +74,32 @@ public class CommentActivity extends AppCompatActivity {
         mCommentsProgressBar.setVisibility(View.VISIBLE);
         progressText = (TextView) findViewById(R.id.commentsLoadingTV);
 
+        setupToolbar();
+
         setupImageLoader();
         initPost();
         initRetrofit();
 
+    }
+    private void setupToolbar()
+    {
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_main);
+        setSupportActionBar(toolbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Log.d(TAG, "onMenuItemClick: clicked menu item: "+ item);
+
+                switch (item.getItemId())
+                {
+                    case R.id.navLogin:
+                        Intent intent = new Intent(CommentActivity.this,LoginActivity.class);
+                        startActivity(intent);
+                }
+
+                return false;
+            }
+        });
     }
 
     void initRetrofit() {
@@ -122,6 +150,12 @@ public class CommentActivity extends AppCompatActivity {
                     mListView = (ListView)findViewById(R.id.commentLV);
                     CommentsListAdapter adapter = new CommentsListAdapter(CommentActivity.this,R.layout.comments_layout,mCommments);
                     mListView.setAdapter(adapter);
+                    mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            getUserComment();
+                        }
+                    });
 
                     mCommentsProgressBar.setVisibility(View.GONE);
                     progressText.setText("");
@@ -174,8 +208,27 @@ public class CommentActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        
+        replyBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: reply");
+                getUserComment();
+            }
+        });
     }
 
+    private void getUserComment(){
+        final Dialog dialog = new Dialog(CommentActivity.this);
+        dialog.setTitle("dialog");
+        dialog.setContentView(R.layout.comment_input_dialog);
+
+        int width = (int)(getResources().getDisplayMetrics().widthPixels*0.95);
+        int height = (int)(getResources().getDisplayMetrics().heightPixels*0.6);
+
+        dialog.getWindow().setLayout(width,height);
+        dialog.show();
+    }
     private void displayImage(String imgUrl, ImageView imageView, final ProgressBar progressBar) {
         ImageLoader imageLoader = ImageLoader.getInstance();
 
@@ -231,5 +284,11 @@ public class CommentActivity extends AppCompatActivity {
         ImageLoader.getInstance().init(config);
         // END - UNIVERSAL IMAGE LOADER SETUP
         defaultImage = this.getResources().getIdentifier("@drawable/reddit_alien", null, this.getPackageName());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.navigation_menu,menu);
+        return true;
     }
 }
