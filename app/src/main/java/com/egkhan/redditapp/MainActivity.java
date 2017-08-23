@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.egkhan.redditapp.Comments.CommentActivity;
 import com.egkhan.redditapp.Model.Feed;
 import com.egkhan.redditapp.Model.entry.Entry;
 import com.egkhan.redditapp.Utils.ExtractXML;
@@ -26,7 +27,6 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    public static final String BASE_URL = "https://www.reddit.com/r/";
 
     Button refreshBtn;
     EditText feedNameEt;
@@ -55,14 +55,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        initRetrofit();
-
     }
 
     private void initRetrofit() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(URLS.BASE_URL)
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .build();
         FeedAPI feedAPI = retrofit.create(FeedAPI.class);

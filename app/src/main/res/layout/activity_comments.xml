@@ -86,6 +86,7 @@
             android:layout_alignRight="@id/progressBarCommentLoading"
             android:layout_alignLeft="@id/progressBarCommentLoading"
             android:layout_alignTop="@id/progressBarCommentLoading"
+            android:id="@+id/commentsLoadingTV"
             />
         <ListView
             android:layout_width="match_parent"

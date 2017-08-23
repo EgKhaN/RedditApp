@@ -12,21 +12,39 @@ public class ExtractXML {
 
     private String tag;
     private String xml;
+    private String endTag;
 
     public ExtractXML(String xml, String tag) {
         this.tag = tag;
         this.xml = xml;
+        this.endTag="NONE";
+    }
+    public ExtractXML(String xml, String tag,String endTag) {
+        this.tag = tag;
+        this.xml = xml;
+        this.endTag = endTag;
     }
 
     public List<String> start(){
         List<String> result = new ArrayList<>();
+        String[] splitXML = null;
+        String marker = null;
 
-        String[] splitXML = xml.split(tag + "\"");
+        if(endTag.equals("NONE")){
+            marker= "\"";
+           splitXML = xml.split(tag + marker);
+        }
+        else {
+            marker = endTag;
+            splitXML = xml.split(tag);
+        }
+
+
         int count = splitXML.length;
 
         for( int i = 1; i < count; i++){
             String temp = splitXML[i];
-            int index = temp.indexOf("\"");
+            int index = temp.indexOf(marker);
             //Log.d(TAG, "start: index: " + index);
             //Log.d(TAG, "start: extracted: " + temp);
 
