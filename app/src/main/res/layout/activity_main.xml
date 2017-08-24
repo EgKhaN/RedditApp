@@ -22,7 +22,8 @@
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar_main"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:background="@drawable/blue_border">
 
                 </android.support.v7.widget.Toolbar>
             </RelativeLayout>
@@ -33,7 +34,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/relLayoutToolbar"
                 android:orientation="horizontal"
-                android:weightSum="100">
+                android:weightSum="100"
+                android:background="@drawable/black_border">
 
                 <EditText
                     android:id="@+id/feedNameEt"
@@ -48,11 +50,13 @@
                 <Button
                     android:id="@+id/refreshFeedBtn"
                     android:layout_width="0dp"
-                    android:layout_height="60dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="30"
                     android:gravity="center"
-                    android:text="Refresh Feed" />
+                    android:text="Refresh Feed"
+                    android:background="@drawable/blue_rounded_button"
+                    android:textColor="@color/colorWhite"/>
             </LinearLayout>
 
             <ListView

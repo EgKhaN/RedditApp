@@ -1,110 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <RelativeLayout
             android:id="@+id/relLayoutToolbar"
             android:layout_width="match_parent"
             android:layout_height="50dp">
 
             <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/toolbar_main">
+                android:background="@drawable/blue_border">
 
             </android.support.v7.widget.Toolbar>
         </RelativeLayout>
+
         <RelativeLayout
+            android:id="@+id/commentHeadingRL"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/commentHeadingRL"
-            android:layout_below="@id/relLayoutToolbar">
+            android:layout_below="@id/relLayoutToolbar"
+            android:background="@drawable/black_border">
+
             <ImageView
+                android:id="@+id/postThumbnail"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginTop="10dp"
-                android:scaleType="centerCrop"
-                android:id="@+id/postThumbnail"/>
+                android:scaleType="centerCrop" />
 
             <Button
+                android:id="@+id/postReplyBtn"
                 android:layout_width="50dp"
                 android:layout_height="30dp"
-                android:id="@+id/postReplyBtn"
-                android:textAlignment="center"
-                android:text="Reply"
-                android:textSize="8sp"
-                android:layout_alignParentRight="true"
                 android:layout_alignBottom="@id/postThumbnail"
-                android:layout_marginRight="10dp"/>
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/ligth_blue_rounded_button"
+                android:text="Reply"
+                android:textAlignment="center"
+                android:textSize="8sp" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/postThumbnail"
-                android:layout_marginLeft="10dp">
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@id/postThumbnail">
+
                 <TextView
-                    android:textStyle="bold"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:id="@+id/postTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
+                    android:gravity="center"
                     android:text="comment"
-                    android:gravity="center"/>
+                    android:textColor="@color/colorDarkGrey" />
+
                 <TextView
-                    android:textSize="10sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:id="@+id/postAuthor"
-                    android:layout_marginTop="3dp"
-                    android:text="Author"
-                    android:gravity="center"
-                    android:layout_below="@id/postTitle"/>
-                <TextView
-                    android:textSize="10sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/postUpdated"
+                    android:layout_below="@id/postTitle"
                     android:layout_marginTop="3dp"
-                    android:text="Last updated"
                     android:gravity="center"
-                    android:layout_below="@id/postAuthor"/>
+                    android:text="Author"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/postUpdated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/postAuthor"
+                    android:layout_marginTop="3dp"
+                    android:gravity="center"
+                    android:text="Last updated"
+                    android:textSize="10sp" />
             </RelativeLayout>
+
             <ProgressBar
-                android:layout_width="50dp"
-                android:layout_height="50dp"
                 android:id="@+id/progressBarPostLoading"
                 style="?android:attr/progressBarStyle"
-                android:layout_centerInParent="true"/>
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true" />
 
 
         </RelativeLayout>
+
         <ProgressBar
-            android:layout_width="100dp"
-            android:layout_height="100dp"
             android:id="@+id/progressBarCommentLoading"
             style="?android:attr/progressBarStyle"
-            android:layout_centerInParent="true"/>
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true" />
+
         <TextView
+            android:id="@+id/commentsLoadingTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:text="Loading comments"
-            android:layout_alignRight="@id/progressBarCommentLoading"
             android:layout_alignLeft="@id/progressBarCommentLoading"
+            android:layout_alignRight="@id/progressBarCommentLoading"
             android:layout_alignTop="@id/progressBarCommentLoading"
-            android:id="@+id/commentsLoadingTV"
-            />
+            android:text="Loading comments"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+
         <ListView
+            android:id="@+id/commentLV"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/commentHeadingRL"
-            android:id="@+id/commentLV"></ListView>
+            android:layout_below="@id/commentHeadingRL"></ListView>
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
