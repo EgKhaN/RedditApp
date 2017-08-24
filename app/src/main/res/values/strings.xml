@@ -5,4 +5,8 @@
     <string name="post_title">post_title</string>
     <string name="post_author">post_author</string>
     <string name="post_updated">post_updated</string>
+    <string name="post_id">post_id</string>
+    <string name="SessionModhash">com.egkhan.redditapp.Account.SessionModhash</string>
+    <string name="SessionUsername">com.egkhan.redditapp.Account.SessionUsername</string>
+    <string name="SessionCookie">com.egkhan.redditapp.Account.SessionCookie</string>
 </resources>

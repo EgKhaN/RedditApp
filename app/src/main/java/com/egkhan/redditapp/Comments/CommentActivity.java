@@ -2,8 +2,10 @@ package com.egkhan.redditapp.Comments;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -37,12 +40,14 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 /**
@@ -57,6 +62,11 @@ public class CommentActivity extends AppCompatActivity {
     static String postTitle;
     static String postAuthor;
     static String postUpdated;
+    static String postId;
+
+    String modhash;
+    String cookie;
+    String username;
 
     int defaultImage;
     String currentFeed;
@@ -70,30 +80,31 @@ public class CommentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
         Log.d(TAG, "onCreate: Stared");
-        mCommentsProgressBar = (ProgressBar)findViewById(R.id.progressBarCommentLoading);
+        mCommentsProgressBar = (ProgressBar) findViewById(R.id.progressBarCommentLoading);
         mCommentsProgressBar.setVisibility(View.VISIBLE);
         progressText = (TextView) findViewById(R.id.commentsLoadingTV);
 
         setupToolbar();
 
+        getSessionParams();
+
         setupImageLoader();
         initPost();
         initRetrofit();
-
     }
-    private void setupToolbar()
-    {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_main);
+
+
+    private void setupToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         setSupportActionBar(toolbar);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Log.d(TAG, "onMenuItemClick: clicked menu item: "+ item);
+                Log.d(TAG, "onMenuItemClick: clicked menu item: " + item);
 
-                switch (item.getItemId())
-                {
+                switch (item.getItemId()) {
                     case R.id.navLogin:
-                        Intent intent = new Intent(CommentActivity.this,LoginActivity.class);
+                        Intent intent = new Intent(CommentActivity.this, LoginActivity.class);
                         startActivity(intent);
                 }
 
@@ -138,7 +149,7 @@ public class CommentActivity extends AppCompatActivity {
                                 "NONE",
                                 "NONE"
                         ));
-                    }catch (NullPointerException e) {
+                    } catch (NullPointerException e) {
                         Log.e(TAG, "onResponse: NullPointerException: " + e.getMessage());
                         mCommments.add(new Comment(
                                 entries.get(i).getId(),
@@ -147,13 +158,13 @@ public class CommentActivity extends AppCompatActivity {
                                 entries.get(i).getUpdated()
                         ));
                     }
-                    mListView = (ListView)findViewById(R.id.commentLV);
-                    CommentsListAdapter adapter = new CommentsListAdapter(CommentActivity.this,R.layout.comments_layout,mCommments);
+                    mListView = (ListView) findViewById(R.id.commentLV);
+                    CommentsListAdapter adapter = new CommentsListAdapter(CommentActivity.this, R.layout.comments_layout, mCommments);
                     mListView.setAdapter(adapter);
                     mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            getUserComment();
+                            getUserComment(mCommments.get(position).getId());
                         }
                     });
 
@@ -178,6 +189,7 @@ public class CommentActivity extends AppCompatActivity {
         postTitle = incomingIntent.getStringExtra(getString(R.string.post_title));
         postAuthor = incomingIntent.getStringExtra(getString(R.string.post_author));
         postUpdated = incomingIntent.getStringExtra(getString(R.string.post_updated));
+        postId = incomingIntent.getStringExtra(getString(R.string.post_id));
 
         TextView title = (TextView) findViewById(R.id.postTitle);
         TextView author = (TextView) findViewById(R.id.postAuthor);
@@ -202,33 +214,103 @@ public class CommentActivity extends AppCompatActivity {
         thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: opening url in webview: "+postUrl);
-                Intent intent = new Intent(CommentActivity.this,WebViewActivity.class);
-                intent.putExtra("url",postUrl);
+                Log.d(TAG, "onClick: opening url in webview: " + postUrl);
+                Intent intent = new Intent(CommentActivity.this, WebViewActivity.class);
+                intent.putExtra("url", postUrl);
                 startActivity(intent);
             }
         });
-        
+
         replyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: reply");
-                getUserComment();
+                getUserComment(postId);
             }
         });
     }
 
-    private void getUserComment(){
+    private void getUserComment(final String post_id) {
         final Dialog dialog = new Dialog(CommentActivity.this);
         dialog.setTitle("dialog");
         dialog.setContentView(R.layout.comment_input_dialog);
 
-        int width = (int)(getResources().getDisplayMetrics().widthPixels*0.95);
-        int height = (int)(getResources().getDisplayMetrics().heightPixels*0.6);
+        int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.95);
+        int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.6);
 
-        dialog.getWindow().setLayout(width,height);
+        dialog.getWindow().setLayout(width, height);
         dialog.show();
+
+        Button postCommentBtn = (Button) dialog.findViewById(R.id.postCommentBtn);
+        final EditText commentET = (EditText) dialog.findViewById(R.id.dialogCommentET);
+
+        postCommentBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: attempting to post comment");
+
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(URLS.COMMENT_URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+                FeedAPI feedAPI = retrofit.create(FeedAPI.class);
+
+                HashMap<String, String> headerMap = new HashMap<>();
+                headerMap.put("User-Agent", username);
+                headerMap.put("X-Modhash", modhash);
+                headerMap.put("cookie", "reddit_Session=" + cookie);
+
+
+                Log.d(TAG, "postCommentBtn: " + "\n" +
+                        "username: " + username + "\n" +
+                        "modhash: " + modhash + "\n" +
+                        "cookie: " + cookie + "\n");
+
+                String theComment = commentET.getText().toString();
+                Call<CheckComment> call = feedAPI.submitComment(headerMap, "comment", post_id, theComment);
+                call.enqueue(new Callback<CheckComment>() {
+                    @Override
+                    public void onResponse(Call<CheckComment> call, Response<CheckComment> response) {
+                        try {
+                            //Log.d(TAG, "onResponse: feed: "+ response.body().toString());
+                            Log.d(TAG, "onResponse: Server Response: " + response);
+                            
+                            String postSuccess = response.body().getSuccess();
+                            if(postSuccess.equals("true")){
+                                dialog.dismiss();
+                                Toast.makeText(CommentActivity.this, "Post Successful", Toast.LENGTH_SHORT).show();
+                            }
+                            else{
+                                Toast.makeText(CommentActivity.this, "Error occured. Did you sign In", Toast.LENGTH_SHORT).show();
+
+                            }
+                        } catch (NullPointerException e) {
+                            Log.d(TAG, "onResponse: NullPointerException: " + e.getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<CheckComment> call, Throwable t) {
+                        Log.e(TAG, "onFailure: unable to retrieve RSS: " + t.getMessage());
+                        Toast.makeText(CommentActivity.this, "An Error Occured: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
+
+    private void getSessionParams() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(CommentActivity.this);
+        username = preferences.getString(getString(R.string.SessionUsername), "");
+        cookie = preferences.getString(getString(R.string.SessionCookie), "");
+        modhash = preferences.getString(getString(R.string.SessionModhash), "");
+
+        Log.d(TAG, "getSessionParams: " + "\n" +
+                "username: " + username + "\n" +
+                "modhash: " + modhash + "\n" +
+                "cookie: " + cookie + "\n");
+    }
+
     private void displayImage(String imgUrl, ImageView imageView, final ProgressBar progressBar) {
         ImageLoader imageLoader = ImageLoader.getInstance();
 
@@ -288,7 +370,15 @@ public class CommentActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.navigation_menu,menu);
+        getMenuInflater().inflate(R.menu.navigation_menu, menu);
         return true;
     }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Log.d(TAG, "onPostResume: Resuming activity");
+        getSessionParams();
+    }
+
 }

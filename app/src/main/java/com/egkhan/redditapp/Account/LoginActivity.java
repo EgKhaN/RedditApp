@@ -1,6 +1,8 @@
 package com.egkhan.redditapp.Account;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -78,14 +80,52 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d(TAG, "onResponse: feed: " + response.body().toString());
                 Log.d(TAG, "onResponse: Server Response: " + response);
 
+                try{
+                    String modhash = response.body().getJson().getData().getModhash();
+                    String cookie = response.body().getJson().getData().getCookie();
+                    Log.d(TAG, "onResponse: modhash: " +modhash);
+                    Log.d(TAG, "onResponse: cookie: " +cookie);
+
+                    if(!modhash.equals("")){
+                        setSessionParams(username,modhash,cookie);
+                        mProgressBar.setVisibility(View.GONE);
+                        mUserName.setText("");
+                        mPassword.setText("");
+
+                        Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                        //navigate back to previous activity
+                        finish();
+                    }
+                }
+                catch (NullPointerException e){
+                    Log.d(TAG, "onResponse: NullPointerException: "+e.getMessage());
+                }
+
+
             }
 
             @Override
             public void onFailure(Call<CheckLogin> call, Throwable t) {
                 Log.e(TAG, "onFailure: unable to retrieve RSS: " + t.getMessage());
                 Toast.makeText(LoginActivity.this, "An Error Occured: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                mProgressBar.setVisibility(View.GONE);
             }
         });
 
+    }
+    private void setSessionParams(String username,String modhash,String cookie)
+    {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        Log.d(TAG, "setSessionParams: Storing session variables: "+"\n"+
+        "username: "+ username +"\n"+
+                "modhash: "+ modhash +"\n"+
+                "cookie: "+ cookie +"\n");
+
+        editor.putString("@string/SessionModhash",modhash);
+        editor.putString("@string/SessionUsername",username);
+        editor.putString("@string/SessionCookie",cookie);
+        editor.commit();
     }
 }

@@ -126,15 +126,17 @@ public class MainActivity extends AppCompatActivity {
                                 entries.get(i).getAuthor().getName(),
                                 entries.get(i).getUpdated(),
                                 postContent.get(0),
-                                postContent.get(lastPosition)
+                                postContent.get(lastPosition),
+                                entries.get(i).getId()
                         ));
                     } catch (NullPointerException e) {
                         posts.add(new Post(
                                 entries.get(i).getTitle(),
-                                null,
+                               null,
                                 entries.get(i).getUpdated(),
                                 postContent.get(0),
-                                postContent.get(lastPosition)
+                                postContent.get(lastPosition),
+                                entries.get(i).getId()
                         ));
                         Log.e(TAG, "onResponse: NullPointerException(thumbnail)" + e.getMessage());
                     }
@@ -145,7 +147,8 @@ public class MainActivity extends AppCompatActivity {
 //                            + "ThumbnailUrl :" + posts.get(i).getThumbnailUrl() + "\n "
 //                            + "Title :" + posts.get(i).getTitle() + "\n "
 //                            + "Author :" + posts.get(i).getAuthor() + "\n "
-//                            + "Updated :" + posts.get(i).getDate_updated() + "\n ");
+//                            + "Updated :" + posts.get(i).getDate_updated() + "\n "
+//                            + "Id :" + posts.get(i).getId() + "\n ");
 //                }
                 ListView listView = (ListView)findViewById(R.id.listView);
                 CustomListAdapter customListAdapter = new CustomListAdapter(MainActivity.this,R.layout.card_layout_main,posts);
@@ -161,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra(getString(R.string.post_title),posts.get(position).getTitle());
                         intent.putExtra(getString(R.string.post_thumbnail),posts.get(position).getThumbnailUrl());
                         intent.putExtra(getString(R.string.post_updated),posts.get(position).getDate_updated());
+                        intent.putExtra(getString(R.string.post_id),posts.get(position).getId());
                         startActivity(intent);
                     }
                 });

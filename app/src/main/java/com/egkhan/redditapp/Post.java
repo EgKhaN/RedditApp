@@ -10,13 +10,23 @@ public class Post {
     private String date_updated;
     private String postUrl;
     private String thumbnailUrl;
+    private String id;
 
-    public Post(String title, String author, String date_updated, String postUrl, String thumbnailUrl) {
+    public Post(String title, String author, String date_updated, String postUrl, String thumbnailUrl, String id) {
         this.title = title;
         this.author = author;
         this.date_updated = date_updated;
         this.postUrl = postUrl;
         this.thumbnailUrl = thumbnailUrl;
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {
